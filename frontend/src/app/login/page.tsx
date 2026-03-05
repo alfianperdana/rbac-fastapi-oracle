@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/AuthContext';
+import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,7 +13,14 @@ export default function LoginPage() {
   const [username, setUsername] = useState('admin');
   const [password, setPassword] = useState('password123');
   const [error, setError] = useState('');
-  const { login } = useAuth();
+  const { login, user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && user) {
+      router.push('/');
+    }
+  }, [user, loading, router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

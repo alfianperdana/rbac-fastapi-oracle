@@ -5,12 +5,12 @@ from app.db.database import get_db
 from app.models.role import Role
 from app.models.permission import Permission
 from app.schemas.all import Role as RoleSchema, RoleCreate, RoleAssignPermissions
-from app.api.dependencies import require_permission
+from app.api.dependencies import require_permission, require_any_permission
 
 router = APIRouter()
 
 @router.get("/", response_model=List[RoleSchema])
-def read_roles(db: Session = Depends(get_db), _ = Depends(require_permission("role.view"))):
+def read_roles(db: Session = Depends(get_db), _ = Depends(require_any_permission(["role.view", "user.view", "user.create", "user.edit"]))):
     roles = db.query(Role).all()
     return roles
 

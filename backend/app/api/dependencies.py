@@ -61,3 +61,27 @@ def require_permission(required_permission: str):
         return current_user
         
     return permission_checker
+
+def require_any_permission(required_permissions: list):
+    """
+    Checks if the user has AT LEAST ONE of the required permissions.
+    """
+    def permission_checker(current_user: User = Depends(get_current_user)):
+        has_permission = False
+        
+        for role in current_user.roles:
+            for perm in role.permissions:
+                if perm.name in required_permissions:
+                    has_permission = True
+                    break
+            if has_permission:
+                break
+                
+        if not has_permission:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Not enough permissions. Required one of: {', '.join(required_permissions)}"
+            )
+        return current_user
+        
+    return permission_checker

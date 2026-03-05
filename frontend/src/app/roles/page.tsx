@@ -25,7 +25,6 @@ export default function RolesPage() {
   const [roles, setRoles] = useState<Role[]>([]);
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
-  const [newRoleName, setNewRoleName] = useState('');
 
   const fetchData = async () => {
     try {
@@ -43,17 +42,6 @@ export default function RolesPage() {
   useEffect(() => {
     fetchData();
   }, []);
-
-  const handleCreateRole = async () => {
-    if (!newRoleName) return;
-    try {
-      await api.post('/roles/', { name: newRoleName, description: 'Created via GUI' });
-      setNewRoleName('');
-      fetchData();
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
   const hasPermission = (role: Role, permId: number) => {
     return role.permissions.some(p => p.id === permId);
@@ -106,14 +94,7 @@ export default function RolesPage() {
               <CardTitle>Master Roles</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex space-x-2 mb-4">
-                <Input 
-                  placeholder="New role name" 
-                  value={newRoleName} 
-                  onChange={e => setNewRoleName(e.target.value)} 
-                />
-                <Button onClick={handleCreateRole}>Add</Button>
-              </div>
+                <p className="text-sm text-slate-500 mb-4">Roles are pre-defined by the system (Admin, Supervisor, Worker).</p>
               <ul className="space-y-2">
                 {roles.map(role => (
                   <li 
