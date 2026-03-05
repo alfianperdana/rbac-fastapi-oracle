@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
+import { useAuth } from '@/lib/AuthContext';
 import api from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,6 +23,7 @@ interface Permission {
 }
 
 export default function RolesPage() {
+  const { hasPermission: hasSystemPermission } = useAuth();
   const [roles, setRoles] = useState<Role[]>([]);
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
@@ -138,6 +140,7 @@ export default function RolesPage() {
                             <Checkbox 
                               checked={hasPermission(selectedRole, perm.id)}
                               onCheckedChange={(checked) => togglePermission(perm.id, checked as boolean)}
+                              disabled={!hasSystemPermission('role.edit')}
                             />
                           </TableCell>
                           <TableCell className="font-mono text-sm">{perm.name}</TableCell>

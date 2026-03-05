@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
+import { useAuth } from '@/lib/AuthContext';
 import api from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,6 +17,7 @@ interface Permission {
 }
 
 export default function PermissionsPage() {
+  const { hasPermission } = useAuth();
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [newName, setNewName] = useState('');
   const [newDesc, setNewDesc] = useState('');
@@ -63,24 +65,26 @@ export default function PermissionsPage() {
           <h1 className="text-3xl font-bold text-slate-800 dark:text-white">Master Data: Permissions</h1>
         </header>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Create New Node</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleCreate} className="flex gap-4 items-end">
-              <div className="space-y-2 flex-1">
-                <Label htmlFor="name">Permission Identity Node (e.g. user.view)</Label>
-                <Input id="name" required value={newName} onChange={e => setNewName(e.target.value)} />
-              </div>
-              <div className="space-y-2 flex-1">
-                <Label htmlFor="desc">Description</Label>
-                <Input id="desc" value={newDesc} onChange={e => setNewDesc(e.target.value)} />
-              </div>
-              <Button type="submit">Create</Button>
-            </form>
-          </CardContent>
-        </Card>
+        {hasPermission('permission.create') && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Create New Node</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleCreate} className="flex gap-4 items-end">
+                <div className="space-y-2 flex-1">
+                  <Label htmlFor="name">Permission Identity Node (e.g. user.view)</Label>
+                  <Input id="name" required value={newName} onChange={e => setNewName(e.target.value)} />
+                </div>
+                <div className="space-y-2 flex-1">
+                  <Label htmlFor="desc">Description</Label>
+                  <Input id="desc" value={newDesc} onChange={e => setNewDesc(e.target.value)} />
+                </div>
+                <Button type="submit">Create</Button>
+              </form>
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardHeader>
@@ -103,7 +107,9 @@ export default function PermissionsPage() {
                     <TableCell className="font-mono text-blue-600">{p.name}</TableCell>
                     <TableCell>{p.description || '-'}</TableCell>
                     <TableCell>
-                      <Button variant="destructive" size="sm" onClick={() => handleDelete(p.id)}>Delete</Button>
+                      {hasPermission('permission.delete') && (
+                        <Button variant="destructive" size="sm" onClick={() => handleDelete(p.id)}>Delete</Button>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}

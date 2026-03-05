@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
+import { useAuth } from '@/lib/AuthContext';
 import api from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,6 +25,7 @@ interface Role {
 }
 
 export default function UsersPage() {
+  const { hasPermission } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -117,6 +119,17 @@ export default function UsersPage() {
     }
   };
 
+  const handleDeleteUser = async (userId: number) => {
+    if (!confirm("Are you sure you want to delete this user?")) return;
+    try {
+      await api.delete(`/users/${userId}`);
+      fetchData();
+    } catch (err: any) {
+      console.error("Failed to delete user", err);
+      alert(err.response?.data?.detail || "Failed to delete user");
+    }
+  };
+
   const openEditDialog = (user: User) => {
     setEditUser({
       id: user.id,
@@ -134,44 +147,46 @@ export default function UsersPage() {
       <main className="flex-1 p-8">
         <header className="mb-6 flex justify-between items-center">
           <h1 className="text-3xl font-bold text-slate-800 dark:text-white">Master Data: Users</h1>
-          <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-            <DialogTrigger asChild>
-              <Button>Create User</Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create New User</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label>Username</Label>
-                  <Input value={newUser.username} onChange={e => setNewUser({...newUser, username: e.target.value})} />
+          {hasPermission('user.create') && (
+            <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+              <DialogTrigger asChild>
+                <Button>Create User</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Create New User</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label>Username</Label>
+                    <Input value={newUser.username} onChange={e => setNewUser({...newUser, username: e.target.value})} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Email</Label>
+                    <Input type="email" value={newUser.email} onChange={e => setNewUser({...newUser, email: e.target.value})} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Password</Label>
+                    <Input type="password" value={newUser.password} onChange={e => setNewUser({...newUser, password: e.target.value})} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Role</Label>
+                    <select 
+                      className="flex h-10 w-full items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-800 dark:bg-slate-950 dark:ring-offset-slate-950 dark:placeholder:text-slate-400 dark:focus:ring-slate-300"
+                      value={newUser.role_id}
+                      onChange={e => setNewUser({...newUser, role_id: e.target.value})}
+                    >
+                      <option value="">No Role</option>
+                      {roles.map(r => (
+                        <option key={r.id} value={r.id}>{r.name.toUpperCase()}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <Button onClick={handleCreateUser} className="w-full">Save User</Button>
                 </div>
-                <div className="space-y-2">
-                  <Label>Email</Label>
-                  <Input type="email" value={newUser.email} onChange={e => setNewUser({...newUser, email: e.target.value})} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Password</Label>
-                  <Input type="password" value={newUser.password} onChange={e => setNewUser({...newUser, password: e.target.value})} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Role</Label>
-                  <select 
-                    className="flex h-10 w-full items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-800 dark:bg-slate-950 dark:ring-offset-slate-950 dark:placeholder:text-slate-400 dark:focus:ring-slate-300"
-                    value={newUser.role_id}
-                    onChange={e => setNewUser({...newUser, role_id: e.target.value})}
-                  >
-                    <option value="">No Role</option>
-                    {roles.map(r => (
-                      <option key={r.id} value={r.id}>{r.name.toUpperCase()}</option>
-                    ))}
-                  </select>
-                </div>
-                <Button onClick={handleCreateUser} className="w-full">Save User</Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+              </DialogContent>
+            </Dialog>
+          )}
 
           {/* Edit User Dialog (hidden logic) */}
           <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
@@ -242,8 +257,13 @@ export default function UsersPage() {
                         ))}
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <Button variant="outline" size="sm" onClick={() => openEditDialog(user)}>Edit User</Button>
+                    <TableCell className="space-x-2">
+                      {hasPermission('user.edit') && (
+                        <Button variant="outline" size="sm" onClick={() => openEditDialog(user)}>Edit</Button>
+                      )}
+                      {hasPermission('user.delete') && (
+                        <Button variant="destructive" size="sm" onClick={() => handleDeleteUser(user.id)}>Delete</Button>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}
