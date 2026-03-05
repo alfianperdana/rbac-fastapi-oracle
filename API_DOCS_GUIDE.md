@@ -15,7 +15,7 @@ Buka browser dan akses URL dokumentasi API di: **http://127.0.0.1:8000/docs**
    ```json
    {
      "username": "admin",
-     "password": "password"
+     "password": "password123"
    }
    ```
    *(Gunakan username dan password admin yang sesuai)*
