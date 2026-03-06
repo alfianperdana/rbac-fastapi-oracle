@@ -1,0 +1,13 @@
+id,name,description
+1,user.view,Permission for user.view
+2,user.create,Permission for user.create
+3,user.edit,Permission for user.edit
+4,user.delete,Permission for user.delete
+5,role.view,Permission for role.view
+6,role.create,Permission for role.create
+7,role.assign,Permission for role.assign
+8,permission.view,Permission for permission.view
+21,snapshot.view,Permission for snapshot.view
+22,snapshot.create,Permission for snapshot.create
+23,snapshot.delete,Permission for snapshot.delete
+24,view_monitoring,Permission for view_monitoring
